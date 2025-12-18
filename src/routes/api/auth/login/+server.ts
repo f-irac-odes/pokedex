@@ -1,9 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getUserByEmail, type User } from '$lib/database';
-
-// Mock user session storage (in production, use proper session management)
-let sessions = new Map<string, { userId: string; email: string; createdAt: Date }>();
+import { getUserByEmail } from '$lib/database';
+import { createSession, destroySession } from '../../utils';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
     try {
@@ -29,29 +27,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         // For demo purposes, we'll accept any password
 
         // Create session
-        const sessionId = crypto.randomUUID();
-        sessions.set(sessionId, {
-            userId: user.id,
-            email: user.email,
-            createdAt: new Date()
-        });
+        createSession(user, cookies);
 
-        // Set session cookie
-        cookies.set('session', sessionId, {
-            path: '/',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 60 * 60 * 24 * 7 // 7 days
-        });
-
-        // Return user data (without sensitive info)
-        const { password: _, ...userWithoutPassword } = user;
-        
+        // Return user data
         return json({
             success: true,
             data: {
-                user: userWithoutPassword,
+                user,
                 message: 'Login successful'
             }
         });
@@ -66,14 +48,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 export const DELETE: RequestHandler = async ({ cookies }) => {
     try {
-        const sessionId = cookies.get('session');
-        
-        if (sessionId) {
-            sessions.delete(sessionId);
-        }
-
-        // Clear session cookie
-        cookies.delete('session', { path: '/' });
+        destroySession(cookies);
 
         return json({
             success: true,
@@ -87,19 +62,3 @@ export const DELETE: RequestHandler = async ({ cookies }) => {
         );
     }
 };
-
-// Export session management functions
-export function getCurrentUser(cookies: any): User | null {
-    const sessionId = cookies.get('session');
-    if (!sessionId) return null;
-
-    const session = sessions.get(sessionId);
-    if (!session) return null;
-    
-    const user = getUserByEmail(session.email);
-    return user || null;
-}
-
-export function isAuthenticated(cookies: any): boolean {
-    return getCurrentUser(cookies) !== null;
-}

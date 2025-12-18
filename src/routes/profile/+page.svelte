@@ -125,8 +125,7 @@
         <button on:click={handleBack}>Back to Feed</button>
     </div>
 {:else}
-
-<div class="profile">
+    <div class="profile">
     <!-- Cover Image -->
     <div class="cover-image">
         <img src={profileUser.coverImage} alt="Cover" />
@@ -275,7 +274,6 @@
                         {/if}
                     </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
