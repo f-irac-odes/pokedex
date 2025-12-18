@@ -133,7 +133,9 @@ export const posts: Post[] = [
         comments: 5,
         isLiked: false,
         mediaType: 'none',
-        isForTrade: false,
+        isForTrade: true,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 156,
         downloads: 0
     },
@@ -150,6 +152,8 @@ export const posts: Post[] = [
         mediaType: 'image',
         isForTrade: true,
         price: 150,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 234,
         downloads: 12
     },
@@ -163,7 +167,9 @@ export const posts: Post[] = [
         comments: 18,
         isLiked: false,
         mediaType: 'none',
-        isForTrade: false,
+        isForTrade: true,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 445,
         downloads: 0
     },
@@ -177,7 +183,9 @@ export const posts: Post[] = [
         comments: 12,
         isLiked: true,
         mediaType: 'none',
-        isForTrade: false,
+        isForTrade: true,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 189,
         downloads: 0
     },
@@ -194,6 +202,8 @@ export const posts: Post[] = [
         mediaType: 'image',
         isForTrade: true,
         price: 200,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 87,
         downloads: 5
     },
@@ -210,6 +220,8 @@ export const posts: Post[] = [
         mediaType: 'video',
         isForTrade: true,
         price: 500,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 892,
         downloads: 23
     },
@@ -224,7 +236,9 @@ export const posts: Post[] = [
         comments: 15,
         isLiked: true,
         mediaType: 'image',
-        isForTrade: false,
+        isForTrade: true,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 345,
         downloads: 45
     },
@@ -241,6 +255,8 @@ export const posts: Post[] = [
         mediaType: 'video',
         isForTrade: true,
         price: 750,
+        pricePerLike: 5,
+        pricePerComment: 10,
         views: 1205,
         downloads: 67
     }
@@ -309,7 +325,7 @@ export function toggleUserFollow(followerId: string, followedId: string): { foll
     }
 }
 
-export function createPost(userId: string, content: string, image?: string, video?: string, price?: number, isForTrade = false): Post {
+export function createPost(userId: string, content: string, image?: string, video?: string, price?: number, pricePerLike = 5, pricePerComment = 10): Post {
     const user = getUserById(userId);
     if (!user) throw new Error('User not found');
 
@@ -322,7 +338,9 @@ export function createPost(userId: string, content: string, image?: string, vide
         video,
         mediaType: video ? 'video' : image ? 'image' : 'none',
         price,
-        isForTrade,
+        isForTrade: true,
+        pricePerLike,
+        pricePerComment,
         timestamp: 'Just now',
         likes: 0,
         comments: 0,
