@@ -15,6 +15,9 @@ export interface User {
     location?: string;
     isVerified: boolean;
     isFollowing?: boolean;
+    credits: number;
+    totalEarnings: number;
+    tradesCompleted: number;
 }
 
 export interface Post {
@@ -23,10 +26,16 @@ export interface Post {
     user: User;
     content: string;
     image?: string;
+    video?: string;
+    mediaType: 'none' | 'image' | 'video';
+    price?: number;
+    isForTrade: boolean;
     timestamp: string;
     likes: number;
     comments: number;
     isLiked: boolean;
+    views?: number;
+    downloads?: number;
 }
 
 // Mock users data
@@ -46,7 +55,10 @@ export const users: User[] = [
         website: 'https://johndoe.dev',
         location: 'San Francisco, CA',
         isVerified: true,
-        isFollowing: false
+        isFollowing: false,
+        credits: 1250,
+        totalEarnings: 5600,
+        tradesCompleted: 23
     },
     {
         id: '2',
@@ -63,7 +75,10 @@ export const users: User[] = [
         website: 'https://sarahdesigns.com',
         location: 'New York, NY',
         isVerified: false,
-        isFollowing: true
+        isFollowing: true,
+        credits: 890,
+        totalEarnings: 3200,
+        tradesCompleted: 15
     },
     {
         id: '3',
@@ -80,7 +95,10 @@ export const users: User[] = [
         website: 'https://mikechen.dev',
         location: 'Austin, TX',
         isVerified: true,
-        isFollowing: false
+        isFollowing: false,
+        credits: 2100,
+        totalEarnings: 8900,
+        tradesCompleted: 41
     },
     {
         id: '4',
@@ -96,7 +114,10 @@ export const users: User[] = [
         joinedDate: 'June 2023',
         location: 'London, UK',
         isVerified: true,
-        isFollowing: false
+        isFollowing: false,
+        credits: 1750,
+        totalEarnings: 4200,
+        tradesCompleted: 18
     }
 ];
 
@@ -110,7 +131,11 @@ export const posts: Post[] = [
         timestamp: '2 hours ago',
         likes: 23,
         comments: 5,
-        isLiked: false
+        isLiked: false,
+        mediaType: 'none',
+        isForTrade: false,
+        views: 156,
+        downloads: 0
     },
     {
         id: '2',
@@ -121,7 +146,12 @@ export const posts: Post[] = [
         timestamp: '4 hours ago',
         likes: 47,
         comments: 12,
-        isLiked: true
+        isLiked: true,
+        mediaType: 'image',
+        isForTrade: true,
+        price: 150,
+        views: 234,
+        downloads: 12
     },
     {
         id: '3',
@@ -131,7 +161,11 @@ export const posts: Post[] = [
         timestamp: '1 day ago',
         likes: 89,
         comments: 18,
-        isLiked: false
+        isLiked: false,
+        mediaType: 'none',
+        isForTrade: false,
+        views: 445,
+        downloads: 0
     },
     {
         id: '4',
@@ -141,7 +175,11 @@ export const posts: Post[] = [
         timestamp: '2 hours ago',
         likes: 47,
         comments: 12,
-        isLiked: true
+        isLiked: true,
+        mediaType: 'none',
+        isForTrade: false,
+        views: 189,
+        downloads: 0
     },
     {
         id: '5',
@@ -152,7 +190,59 @@ export const posts: Post[] = [
         likes: 23,
         comments: 5,
         isLiked: false,
-        image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=400&fit=crop'
+        image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=400&fit=crop',
+        mediaType: 'image',
+        isForTrade: true,
+        price: 200,
+        views: 87,
+        downloads: 5
+    },
+    {
+        id: '6',
+        userId: '2',
+        user: users[1],
+        content: 'Check out this awesome UI design I created for a mobile app! 📱✨',
+        video: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+        timestamp: '3 hours ago',
+        likes: 156,
+        comments: 28,
+        isLiked: false,
+        mediaType: 'video',
+        isForTrade: true,
+        price: 500,
+        views: 892,
+        downloads: 23
+    },
+    {
+        id: '7',
+        userId: '3',
+        user: users[2],
+        content: 'Free stock photo of modern office workspace! Great for presentations and websites. 💼',
+        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=400&fit=crop',
+        timestamp: '6 hours ago',
+        likes: 78,
+        comments: 15,
+        isLiked: true,
+        mediaType: 'image',
+        isForTrade: false,
+        views: 345,
+        downloads: 45
+    },
+    {
+        id: '8',
+        userId: '4',
+        user: users[3],
+        content: 'Time-lapse video of my AI model training process. This took 3 hours! 🤖⏰',
+        video: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4',
+        timestamp: '8 hours ago',
+        likes: 234,
+        comments: 42,
+        isLiked: false,
+        mediaType: 'video',
+        isForTrade: true,
+        price: 750,
+        views: 1205,
+        downloads: 67
     }
 ];
 
@@ -219,7 +309,7 @@ export function toggleUserFollow(followerId: string, followedId: string): { foll
     }
 }
 
-export function createPost(userId: string, content: string, image?: string): Post {
+export function createPost(userId: string, content: string, image?: string, video?: string, price?: number, isForTrade = false): Post {
     const user = getUserById(userId);
     if (!user) throw new Error('User not found');
 
@@ -229,14 +319,76 @@ export function createPost(userId: string, content: string, image?: string): Pos
         user,
         content,
         image,
+        video,
+        mediaType: video ? 'video' : image ? 'image' : 'none',
+        price,
+        isForTrade,
         timestamp: 'Just now',
         likes: 0,
         comments: 0,
-        isLiked: false
+        isLiked: false,
+        views: 0,
+        downloads: 0
     };
 
     posts.unshift(newPost);
     user.posts += 1;
     
     return newPost;
+}
+
+// Credit and trading functions
+export function addCredits(userId: string, amount: number): User {
+    const user = getUserById(userId);
+    if (!user) throw new Error('User not found');
+    
+    user.credits += amount;
+    user.totalEarnings += amount;
+    return user;
+}
+
+export function spendCredits(userId: string, amount: number): boolean {
+    const user = getUserById(userId);
+    if (!user || user.credits < amount) return false;
+    
+    user.credits -= amount;
+    return true;
+}
+
+export function purchaseMedia(postId: string, buyerId: string): boolean {
+    const post = posts.find(p => p.id === postId);
+    const buyer = getUserById(buyerId);
+    const seller = post ? getUserById(post.userId) : null;
+    
+    if (!post || !post.isForTrade || !post.price || !buyer || !seller) {
+        return false;
+    }
+    
+    if (buyer.credits < post.price) return false;
+    
+    // Process the transaction
+    buyer.credits -= post.price;
+    seller.credits += post.price;
+    seller.totalEarnings += post.price;
+    seller.tradesCompleted += 1;
+    
+    post.downloads = (post.downloads || 0) + 1;
+    
+    return true;
+}
+
+export function downloadMedia(postId: string): boolean {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return false;
+    
+    post.downloads = (post.downloads || 0) + 1;
+    return true;
+}
+
+export function getAllMedia(): Post[] {
+    return posts.filter(post => post.mediaType !== 'none');
+}
+
+export function getMediaForTrade(): Post[] {
+    return posts.filter(post => post.isForTrade && post.mediaType !== 'none');
 }
