@@ -19,33 +19,40 @@
     let loading = $state(false);
     
     onMount(async () => {
-        // Check if user is authenticated
-        if (!$currentUser) {
-            goto('/login');
-            return;
-        }
-        
-        // Fetch posts
+        // Fetch posts (works for both authenticated and guest users)
         loading = true;
         await fetchPosts();
         loading = false;
         
-        // Connect to realtime updates
-        connectRealtime();
+        // Connect to realtime updates only for authenticated users
+        if ($currentUser) {
+            connectRealtime();
+        }
     });
     
     onDestroy(() => {
         disconnectRealtime();
     });
     
+    // Reactive user state
+    let user = $state<any>(null);
+    $effect(() => {
+        const unsubscribe = currentUser.subscribe(u => user = u);
+        return unsubscribe;
+    });
+    
     function handleLogout() {
         logout().then(() => {
-            goto('/login');
+            goto('/');
         }).catch(console.error);
     }
     
     function handleProfile() {
-        goto('/profile');
+        if (user) {
+            goto(`/profile/${user.username}`);
+        } else {
+            goto('/login');
+        }
     }
     
     async function createPost() {
