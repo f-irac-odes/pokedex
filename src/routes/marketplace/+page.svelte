@@ -102,9 +102,11 @@
 	}
 
 	// React to filter changes
-	$: if (posts.length > 0) {
+	$effect(() => {
+		if (posts.length > 0) {
 		fetchPosts();
 	}
+	}) 
 </script>
 
 <svelte:head>
